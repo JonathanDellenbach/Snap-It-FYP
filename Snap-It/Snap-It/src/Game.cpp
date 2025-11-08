@@ -2,30 +2,36 @@
 #include <iostream>
 
 Game::Game() :
-    window{ sf::VideoMode{ sf::Vector2u{1920U, 1080U}, 32U }, "SFML Game 3.0" },
-    m_gameValid(false)
+    window{ sf::VideoMode{ sf::Vector2u{1920U, 1080U}, 32U }, "Snap-It" },
+    m_gameValid(false),
+    m_currentState(GameState::Menu)
 {
-    m_gameValid = validateEntities();
+    m_gameValid = loadAssets();
+
+    if (m_gameValid)
+    {
+        m_menu = std::make_unique<Menu>(font, window.getSize());
+        if (!m_menu->isValid())
+        {
+            std::cout << "Failed to load menu!" << std::endl;
+            m_gameValid = false;
+        }
+    }
 }
 
 Game::~Game()
 {
 }
 
-bool Game::validateEntities()
+bool Game::loadAssets()
 {
-    if (!m_player.isValid())
+    if (!font.openFromFile("assets/fonts/Jersey20-Regular.ttf"))
     {
-        std::cout << "Failed to load player!" << std::endl;
-        return false;
-    }
-    if (!m_enemy.isValid())
-    {
-        std::cout << "Failed to load enemy!" << std::endl;
+        std::cout << "Failed to load font!" << std::endl;
         return false;
     }
 
-    std::cout << "All entities loaded successfully!" << std::endl;
+    std::cout << "All assets loaded successfully!" << std::endl;
     return true;
 }
 
@@ -64,9 +70,25 @@ void Game::processEvents()
         {
             exitGame = true;
         }
+
         if (newEvent->is<sf::Event::KeyPressed>())
         {
             processKeys(newEvent);
+        }
+
+        if (newEvent->is<sf::Event::MouseButtonPressed>())
+        {
+            processMouseClick(newEvent);
+        }
+
+        //mouse movement for button hover effects
+        if (newEvent->is<sf::Event::MouseMoved>())
+        {
+            if (m_currentState == GameState::Menu && m_menu)
+            {
+                const sf::Event::MouseMoved* mouseMove = newEvent->getIf<sf::Event::MouseMoved>();
+                m_menu->handleMouseMove(sf::Vector2f((mouseMove->position.x),(mouseMove->position.y)));
+            }
         }
     }
 }
@@ -74,38 +96,123 @@ void Game::processEvents()
 void Game::processKeys(const std::optional<sf::Event> t_event)
 {
     const sf::Event::KeyPressed* newKeypress = t_event->getIf<sf::Event::KeyPressed>();
+
     if (sf::Keyboard::Key::Escape == newKeypress->code)
     {
-        exitGame = true;
+        //if in game return to menu. If in menu exit
+        if (m_currentState == GameState::Playing)
+        {
+            m_currentState = GameState::Menu;
+            m_menu->reset();
+        }
+        else if (m_currentState == GameState::About)
+        {
+            m_currentState = GameState::Menu;
+            m_menu->reset();
+        }
+        else
+        {
+            exitGame = true;
+        }
+    }
+}
+
+void Game::processMouseClick(const std::optional<sf::Event> t_event)
+{
+    const sf::Event::MouseButtonPressed* mouseClick = t_event->getIf<sf::Event::MouseButtonPressed>();
+
+    if (mouseClick->button == sf::Mouse::Button::Left)
+    {
+        if (m_currentState == GameState::Menu && m_menu)
+        {
+            m_menu->handleMouseClick(sf::Vector2f((mouseClick->position.x),(mouseClick->position.y)));
+        }
     }
 }
 
 void Game::checkKeyboardState()
 {
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape))
-    {
-        exitGame = true;
-    }
 }
 
 void Game::update(sf::Time t_deltaTime)
 {
-    checkKeyboardState();
+    switch (m_currentState)
+    {
+    case GameState::Menu:
+        if (m_menu)
+        {
+            m_menu->update(t_deltaTime);
+
+            // Check if menu wants to change state
+            if (m_menu->shouldExit())
+            {
+                exitGame = true; //game closes
+            }
+            else if (m_menu->getNextState() != GameState::Menu)
+            {
+                m_currentState = m_menu->getNextState();
+                std::cout << "Switching to state: " << static_cast<int>(m_currentState) << std::endl;
+            }
+        }
+        break;
+
+    case GameState::Playing:
+        break;
+
+    case GameState::Paused:
+        break;
+
+    case GameState::GameOver:
+        break;
+    }
+
     if (exitGame)
     {
         window.close();
     }
-
-    m_player.update(t_deltaTime);
-    m_enemy.update(t_deltaTime);
 }
 
 void Game::render()
 {
-    window.clear(sf::Color::Black);
+    window.clear(sf::Color(50, 50, 80)); //Dark bluegray background for my theme
 
-    m_player.render(window);
-    m_enemy.render(window);
+    switch (m_currentState)
+    {
+    case GameState::Menu:
+        if (m_menu)
+        {
+            m_menu->render(window);
+        }
+        break;
+
+    case GameState::Playing:
+    {
+        sf::Text playText(font);
+        playText.setString("PLAYING - Press ESC to return to menu");
+        playText.setCharacterSize(40);
+        playText.setFillColor(sf::Color::White);
+        playText.setPosition(sf::Vector2f(400.0f, 500.0f));
+        window.draw(playText);
+    }
+    break;
+
+    case GameState::About:
+    {
+        sf::Text aboutText(font);
+        aboutText.setString("ABOUT\n\nThis is just template text\n\nPress ESC to return to menu");
+        aboutText.setCharacterSize(30);
+        aboutText.setFillColor(sf::Color::White);
+        aboutText.setPosition(sf::Vector2f(600.0f, 400.0f));
+        window.draw(aboutText);
+    }
+    break;
+
+    case GameState::Paused:
+        break;
+
+    case GameState::GameOver:
+        break;
+    }
 
     window.display();
 }

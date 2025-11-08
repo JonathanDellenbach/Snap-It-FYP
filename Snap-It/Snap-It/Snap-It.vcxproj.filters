@@ -28,6 +28,12 @@
     <Filter Include="Source Files\Entities">
       <UniqueIdentifier>{bfed8eb1-6edf-4d35-b3aa-bf83e0a92f0d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\MenuManagement">
+      <UniqueIdentifier>{44598acd-b194-4149-beda-0450690e3f13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MenuManagement">
+      <UniqueIdentifier>{454e0f9c-2a56-4a58-a920-f1a59988c426}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Image Include="ASSETS\IMAGES\SFML-LOGO.png">
@@ -66,6 +72,12 @@
     <ClCompile Include="src\Entity.cpp">
       <Filter>Source Files\Entities</Filter>
     </ClCompile>
+    <ClCompile Include="Button.cpp">
+      <Filter>Source Files\MenuManagement</Filter>
+    </ClCompile>
+    <ClCompile Include="Menu.cpp">
+      <Filter>Source Files\MenuManagement</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Game.h">
@@ -79,6 +91,15 @@
     </ClInclude>
     <ClInclude Include="include\Entity.h">
       <Filter>Header Files\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="GameState.h">
+      <Filter>Header Files\MenuManagement</Filter>
+    </ClInclude>
+    <ClInclude Include="Button.h">
+      <Filter>Header Files\MenuManagement</Filter>
+    </ClInclude>
+    <ClInclude Include="Menu.h">
+      <Filter>Header Files\MenuManagement</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
