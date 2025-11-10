@@ -1,110 +1,120 @@
 #include "Player.h"
-
-#define _USE_MATH_DEFINES
-#include <math.h>
+#include <iostream>
 
 Player::Player()
-    : m_speed(0.0f)
-    , m_rotation(sf::degrees(0.0f))  // Initialize using sf::degrees()
+    : m_mousePosition(0.0f, 0.0f)
+    , m_isCapturing(false)
+    , m_captureComplete(false)
+    , m_captureTimer(0.0f)
+    , m_soundLoaded(false)
+    , m_isValid(true)
 {
-    // Call initTexture() in the derived class constructor - this is safe
-    initTexture();
+    // Setup camera frame
+    m_viewfinder.setSize(sf::Vector2f(VIEWFINDER_WIDTH, VIEWFINDER_HEIGHT));
+    m_viewfinder.setFillColor(sf::Color(255, 255, 255, 0));
+    m_viewfinder.setOutlineThickness(3.0f);
+    m_viewfinder.setOutlineColor(sf::Color::White);
 
-    // Set player-specific properties after texture is loaded
-    if (isValid())
+    //Set origin to center on mouse
+    m_viewfinder.setOrigin(sf::Vector2f(VIEWFINDER_WIDTH / 2.0f, VIEWFINDER_HEIGHT / 2.0f));
+
+    // flash overlay
+    m_flashOverlay.setSize(sf::Vector2f(VIEWFINDER_WIDTH, VIEWFINDER_HEIGHT));
+    m_flashOverlay.setOrigin(sf::Vector2f(VIEWFINDER_WIDTH / 2.0f, VIEWFINDER_HEIGHT / 2.0f));
+    m_flashOverlay.setFillColor(sf::Color(255, 255, 255, 0));
+
+    std::cout << "Camera init" << std::endl;
+}
+
+void Player::update(sf::Time deltaTime, sf::Vector2f mousePos)
+{
+    //update mouse position
+    m_mousePosition = mousePos;
+
+    //center on mouse position
+    m_viewfinder.setPosition(m_mousePosition);
+
+    //center flash overlay on mouse position
+    m_flashOverlay.setPosition(m_mousePosition);
+
+    //capture animation
+    if (m_isCapturing)
     {
-        setPosition(sf::Vector2f{ 150.f, 50.f });
+        m_captureTimer += deltaTime.asSeconds();
+
+        //calculate flash fade
+        float progress = m_captureTimer / CAPTURE_DURATION;
+        if (progress <= 1.0f)
+        {
+            // Fade from white to transparent
+            int alpha = static_cast<int>(255 * (1.0f - progress));
+            m_flashOverlay.setFillColor(sf::Color(255, 255, 255, alpha));
+        }
+        else //capture animation complete
+        {
+            m_isCapturing = false;
+            m_captureComplete = true;
+            m_captureTimer = 0.0f;
+            m_flashOverlay.setFillColor(sf::Color(255, 255, 255, 0));
+            std::cout << "Capture finish" << std::endl;
+        }
     }
 }
 
-void Player::initTexture()
+void Player::render(sf::RenderWindow& window)
 {
-    // Player-specific texture loading
-    loadTexture("ASSETS\\IMAGES\\PlayerShip.png", 64.f, 64.f);
+    //draw camera box
+    window.draw(m_viewfinder);
 
-    // Set origin to center of sprite for proper rotation
-    if (isValid())
+    //draw flash overlay if capturing
+    if (m_isCapturing)
     {
-        sf::FloatRect bounds = m_sprite.getLocalBounds();
-        m_sprite.setOrigin(sf::Vector2f(bounds.size.x / 2.0f, bounds.size.y / 2.0f));
+        window.draw(m_flashOverlay);
     }
 }
 
-void Player::update(sf::Time deltaTime)
+void Player::startCapture()
 {
-    // Convert sf::Time to double milliseconds
-    double dt = deltaTime.asMilliseconds();
+    if (!m_isCapturing)
+    {
+        m_isCapturing = true;
+        m_captureComplete = false;
+        m_captureTimer = 0.0f;
+        m_flashOverlay.setFillColor(sf::Color(255, 255, 255, 255));
 
-    // Handle user input
-    handleInput();
+        //play capture sound
+        if (m_soundLoaded && m_captureSound)
+        {
+            m_captureSound->play();
+        }
 
-    // Handle speed and movement
-    handleSpeed(dt);
-}
-
-// Method to handle user input for player movement and rotation
-void Player::handleInput()
-{
-    using Key = sf::Keyboard::Key;
-
-    if (sf::Keyboard::isKeyPressed(Key::W)) {
-        increaseSpeed();
-    }
-    if (sf::Keyboard::isKeyPressed(Key::S)) {
-        decreaseSpeed();
-    }
-    if (sf::Keyboard::isKeyPressed(Key::A)) {
-        decreaseRotation();
-    }
-    if (sf::Keyboard::isKeyPressed(Key::D)) {
-        increaseRotation();
+        std::cout << "Capture start" << std::endl;
     }
 }
 
-// Method to handle player speed based on input
-void Player::handleSpeed(double dt)
+void Player::resetCapture()
 {
-    // Clamp speed within specified range
-    m_speed = std::clamp(m_speed, MAX_REVERSE_SPEED, MAX_FORWARD_SPEED);
-
-    // Forward vector adjusted so 0° means "up" instead of "right" (This is due to the current sprite being "UP" change depending on Project config)
-    float angleRad = m_rotation.asRadians() - static_cast<float>(M_PI) / 2.0f;
-
-    // Calculate new position
-    sf::Vector2f pos = m_sprite.getPosition();
-    pos.x += std::cos(angleRad) * m_speed * (dt / 1000.0);
-    pos.y += std::sin(angleRad) * m_speed * (dt / 1000.0);
-
-    // Update position and rotation
-    m_sprite.setPosition(pos);
-    m_sprite.setRotation(m_rotation);
-
-    // Apply speed decay
-    m_speed *= 0.99f;
+    m_captureComplete = false;
 }
 
-// Method to increase player speed
-void Player::increaseSpeed()
+sf::FloatRect Player::getCaptureArea() const
 {
-    m_speed += 5.0f;
+    return m_viewfinder.getGlobalBounds();
 }
 
-// Method to decrease player speed
-void Player::decreaseSpeed()
+bool Player::loadCaptureSound(const std::string& filepath)
 {
-    m_speed -= 5.0f;
-}
-
-// Method to increase player rotation
-void Player::increaseRotation()
-{
-    m_rotation += sf::degrees(1.0f);  // Add 1 degree using sf::degrees()
-    m_rotation = m_rotation.wrapUnsigned();  // Wrap to 0-360 degrees automatically
-}
-
-// Method to decrease player rotation
-void Player::decreaseRotation()
-{
-    m_rotation -= sf::degrees(1.0f);  // Subtract 1 degree using sf::degrees()
-    m_rotation = m_rotation.wrapUnsigned();  // Wrap to 0-360 degrees automatically
+    if (m_captureSoundBuffer.loadFromFile(filepath))
+    {
+        //create the sound object
+        m_captureSound = std::make_unique<sf::Sound>(m_captureSoundBuffer);
+        m_soundLoaded = true;
+        return true;
+    }
+    else
+    {
+        std::cout << "Failed to load camera sound" << std::endl;
+        m_soundLoaded = false;
+        return false;
+    }
 }

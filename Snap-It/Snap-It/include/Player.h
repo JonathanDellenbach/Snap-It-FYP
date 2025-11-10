@@ -1,31 +1,49 @@
 #ifndef PLAYER_HPP
 #define PLAYER_HPP
 
-#include "Entity.h"
+#include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 
-class Player : public Entity
+class Player
 {
 public:
     Player();
     ~Player() = default;
 
-    // Override the pure virtual functions
-    void initTexture() override;
-    void update(sf::Time deltaTime) override;
+    void update(sf::Time deltaTime, sf::Vector2f mousePos);
+    void render(sf::RenderWindow& window);
 
-    // Movement and rotation methods
-    void handleInput();
-    void handleSpeed(double deltaTime);
-    void increaseSpeed();
-    void decreaseSpeed();
-    void increaseRotation();
-    void decreaseRotation();
+    void startCapture(); //when LMB is pressed
+    bool isCapturing() { return m_isCapturing; }
+    bool captureComplete() { return m_captureComplete; }
+    void resetCapture();  //reset once done to capture again
+
+    sf::FloatRect getCaptureArea() const; //returns camera bounds for NPC detection
+    bool isValid() { return m_isValid; }
+
+    bool loadCaptureSound(const std::string& filepath); //load the shutter sound effect
+
 private:
-    float m_speed;                  // Current speed
-    sf::Angle m_rotation;           // Current rotation using sf::Angle
-    static constexpr const float MAX_FORWARD_SPEED = 200.0f;
-    static constexpr const float MAX_REVERSE_SPEED = -100.0f;
+    //camera frame
+    sf::RectangleShape m_viewfinder;
+    sf::Vector2f m_mousePosition;
 
+    // shutter animation (might be replaced by sprites)
+    bool m_isCapturing;
+    bool m_captureComplete;
+    float m_captureTimer;
+    sf::RectangleShape m_flashOverlay;
+
+    // Audio
+    sf::SoundBuffer m_captureSoundBuffer;
+    std::unique_ptr<sf::Sound> m_captureSound;
+    bool m_soundLoaded;
+
+    const float VIEWFINDER_WIDTH = 400.0f;
+    const float VIEWFINDER_HEIGHT = 200.0f;
+    const float CAPTURE_DURATION = 0.2f; // 0.2 seconds for flash
+
+    bool m_isValid;
 };
 
 #endif

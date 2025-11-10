@@ -8,15 +8,15 @@ Menu::Menu(sf::Font& font, sf::Vector2u windowSize)
     m_shouldExit(false),
     m_isValid(true)
 {
-    //placeholder for the old computer place
+    //placeholder for the old computer place will replace this with an image/animation later on
     m_computerScreen.setSize(sf::Vector2f(600.0f, 500.0f));
     m_computerScreen.setPosition(sf::Vector2f(
-        windowSize.x / 2.f - 300.0f,
-        windowSize.y / 2.f - 250.0f
+        windowSize.x / 2.0f - 300.0f,
+        windowSize.y / 2.0f - 250.0f
     ));
-    m_computerScreen.setFillColor(sf::Color(210, 180, 140, 255)); // Beige color
+    m_computerScreen.setFillColor(sf::Color(210, 180, 140, 255)); //beige color
     m_computerScreen.setOutlineThickness(5.0f);
-    m_computerScreen.setOutlineColor(sf::Color(139, 115, 85)); // Darker beige border
+    m_computerScreen.setOutlineColor(sf::Color(139, 115, 85)); //darker border
 
     // Setup title text
     m_titleText.setString("Snap-It");
@@ -83,45 +83,43 @@ void Menu::handleMouseClick(sf::Vector2f mousePos)
     {
         if (button->isClicked(mousePos))
         {
-            // Check which button was clicked using a simple switch
             switch (button->getID())
             {
             case ButtonID::Play:
                 m_nextState = GameState::Playing;
-                std::cout << "Play button clicked!" << std::endl;
+                std::cout << "Play button" << std::endl;
                 break;
 
             case ButtonID::About:
                 m_nextState = GameState::About;
-                std::cout << "About button clicked!" << std::endl;
+                std::cout << "About button" << std::endl;
                 break;
 
             case ButtonID::Exit:
                 m_shouldExit = true;
-                std::cout << "Exit button clicked!" << std::endl;
+                std::cout << "Exit button" << std::endl;
                 break;
 
             case ButtonID::None:
-                // Do nothing
                 break;
             }
         }
     }
 }
 
-void Menu::update(sf::Time deltaTime)
+void Menu::update(sf::Time deltaTime) //placeholder for proper images/animations
 {
 }
 
 void Menu::render(sf::RenderWindow& window)
 {
-    // Draw the beige computer screen background
+    //for now the template screen
     window.draw(m_computerScreen);
 
-    // Draw title
+    //title
     window.draw(m_titleText);
 
-    // Draw all buttons
+    //all buttons
     for (auto& button : m_buttons)
     {
         button->render(window);

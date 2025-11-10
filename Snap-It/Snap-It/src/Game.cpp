@@ -16,6 +16,19 @@ Game::Game() :
             std::cout << "Failed to load menu!" << std::endl;
             m_gameValid = false;
         }
+
+        //Player
+        m_player = std::make_unique<Player>();
+        if (!m_player->isValid())
+        {
+            std::cout << "Failed to load player!" << std::endl;
+            m_gameValid = false;
+        }
+
+        if (m_player)
+        {
+            m_player->loadCaptureSound("assets/AUDIO/camera-shutter.wav");
+        }
     }
 }
 
@@ -100,7 +113,7 @@ void Game::processKeys(const std::optional<sf::Event> t_event)
     if (sf::Keyboard::Key::Escape == newKeypress->code)
     {
         //if in game return to menu. If in menu exit
-        if (m_currentState == GameState::Playing)
+        if (m_currentState == GameState::Playing || m_currentState == GameState::Capturing)
         {
             m_currentState = GameState::Menu;
             m_menu->reset();
@@ -126,6 +139,12 @@ void Game::processMouseClick(const std::optional<sf::Event> t_event)
         if (m_currentState == GameState::Menu && m_menu)
         {
             m_menu->handleMouseClick(sf::Vector2f((mouseClick->position.x),(mouseClick->position.y)));
+        }
+        else if (m_currentState == GameState::Playing && m_player)
+        {
+            m_player->startCapture();
+            m_currentState = GameState::Capturing;
+            std::cout << "Gamestate changed: Capturing" << std::endl;
         }
     }
 }
@@ -157,6 +176,38 @@ void Game::update(sf::Time t_deltaTime)
         break;
 
     case GameState::Playing:
+        if (m_player)
+        {
+            sf::Vector2i mousePixelPos = sf::Mouse::getPosition(window);
+            sf::Vector2f mousePos(mousePixelPos.x,mousePixelPos.y);
+            m_player->update(t_deltaTime, mousePos);
+        }
+        break;
+
+    case GameState::Capturing:
+        // Update capture animation
+        if (m_player)
+        {
+            sf::Vector2i mousePixelPos = sf::Mouse::getPosition(window);
+            sf::Vector2f mousePos(mousePixelPos.x,mousePixelPos.y);
+            m_player->update(t_deltaTime, mousePos);
+
+            //check if capture is complete
+            if (m_player->captureComplete())
+            {
+                std::cout << "Capture complete return to Playing gameState" << std::endl;
+                m_currentState = GameState::Playing;
+                m_player->resetCapture();
+            }
+        }
+        break;
+
+    case GameState::ShowingPhoto:
+        // Display captured photo to NPCs
+        break;
+
+    case GameState::NPCReaction:
+        //NPCs react to photo 
         break;
 
     case GameState::Paused:
@@ -186,15 +237,22 @@ void Game::render()
         break;
 
     case GameState::Playing:
-    {
-        sf::Text playText(font);
-        playText.setString("PLAYING - Press ESC to return to menu");
-        playText.setCharacterSize(40);
-        playText.setFillColor(sf::Color::White);
-        playText.setPosition(sf::Vector2f(400.0f, 500.0f));
-        window.draw(playText);
-    }
-    break;
+    case GameState::Capturing:
+
+        if (m_player)
+        {
+            m_player->render(window);
+        }
+
+        {
+            sf::Text playText(font);
+            playText.setString("PLAYING - Press ESC to return to menu");
+            playText.setCharacterSize(40);
+            playText.setFillColor(sf::Color::White);
+            playText.setPosition(sf::Vector2f(400.0f, 500.0f));
+            window.draw(playText);
+        }
+        break;
 
     case GameState::About:
     {

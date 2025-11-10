@@ -13,7 +13,7 @@ enum class GameState
     About           // About
 };
 
-enum class GamePhase
+enum class GamePhase // ** remider to self these might be subject to change **
 {
     Introduction,   // Initial peaceful state
     FirstCapture,   // After first photo

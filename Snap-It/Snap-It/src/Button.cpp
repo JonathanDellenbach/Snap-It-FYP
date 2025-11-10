@@ -56,7 +56,7 @@ bool Button::isClicked(sf::Vector2f mousePos)
     if (m_shape.getGlobalBounds().contains(mousePos))
     {
         m_shape.setFillColor(m_clickColor);
-        return true;  // Just return true, Menu will check the ID
+        return true;
     }
     return false;
 }

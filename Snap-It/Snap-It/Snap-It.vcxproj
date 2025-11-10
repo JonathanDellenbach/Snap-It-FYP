@@ -31,24 +31,26 @@
   </ItemGroup>
   <ItemGroup>
     <Media Include="ASSETS\AUDIO\beep.wav" />
+    <Media Include="ASSETS\AUDIO\camera-shutter.mp3" />
+    <Media Include="ASSETS\AUDIO\camera-shutter.wav" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Button.cpp" />
-    <ClCompile Include="Menu.cpp" />
+    <ClCompile Include="src\Button.cpp" />
     <ClCompile Include="src\Enemy.cpp" />
     <ClCompile Include="src\Entity.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Menu.cpp" />
     <ClCompile Include="src\Player.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Button.h" />
-    <ClInclude Include="GameState.h" />
+    <ClInclude Include="include\Button.h" />
     <ClInclude Include="include\Enemy.h" />
     <ClInclude Include="include\Entity.h" />
     <ClInclude Include="include\Game.h" />
+    <ClInclude Include="include\GameState.h" />
+    <ClInclude Include="include\Menu.h" />
     <ClInclude Include="include\Player.h" />
-    <ClInclude Include="Menu.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

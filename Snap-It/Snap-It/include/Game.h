@@ -5,6 +5,7 @@
 #include <SFML/Audio.hpp>
 #include "GameState.h"
 #include "Menu.h"
+#include "Player.h"
 
 class Game
 {
@@ -27,10 +28,17 @@ private:
     bool exitGame = false;
     bool m_gameValid = false;
 
+    //State management
     GameState m_currentState;
+
+    //Phase Management
+    GamePhase m_currentPhase;
 
     // Menu
     std::unique_ptr<Menu> m_menu;
+
+    //Player
+    std::unique_ptr<Player> m_player;
 };
 
 #pragma warning( pop ) 

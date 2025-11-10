@@ -30,8 +30,7 @@ private:
     std::vector<std::unique_ptr<Button>> m_buttons;
     sf::Font& m_font;
 
-    // For the "computer screen" effect
-    sf::RectangleShape m_computerScreen;
+    sf::RectangleShape m_computerScreen; //template computer screen
     sf::Text m_titleText;
 
     GameState m_nextState;
