@@ -100,7 +100,7 @@ void Game::processEvents()
             if (m_currentState == GameState::Menu && m_menu)
             {
                 const sf::Event::MouseMoved* mouseMove = newEvent->getIf<sf::Event::MouseMoved>();
-                m_menu->handleMouseMove(sf::Vector2f((mouseMove->position.x),(mouseMove->position.y)));
+                m_menu->handleMouseMove(sf::Vector2f((mouseMove->position.x), (mouseMove->position.y)));
             }
         }
     }
@@ -138,7 +138,7 @@ void Game::processMouseClick(const std::optional<sf::Event> t_event)
     {
         if (m_currentState == GameState::Menu && m_menu)
         {
-            m_menu->handleMouseClick(sf::Vector2f((mouseClick->position.x),(mouseClick->position.y)));
+            m_menu->handleMouseClick(sf::Vector2f((mouseClick->position.x), (mouseClick->position.y)));
         }
         else if (m_currentState == GameState::Playing && m_player)
         {
@@ -179,7 +179,7 @@ void Game::update(sf::Time t_deltaTime)
         if (m_player)
         {
             sf::Vector2i mousePixelPos = sf::Mouse::getPosition(window);
-            sf::Vector2f mousePos(mousePixelPos.x,mousePixelPos.y);
+            sf::Vector2f mousePos(mousePixelPos.x, mousePixelPos.y);
             m_player->update(t_deltaTime, mousePos);
         }
         break;
@@ -189,7 +189,7 @@ void Game::update(sf::Time t_deltaTime)
         if (m_player)
         {
             sf::Vector2i mousePixelPos = sf::Mouse::getPosition(window);
-            sf::Vector2f mousePos(mousePixelPos.x,mousePixelPos.y);
+            sf::Vector2f mousePos(mousePixelPos.x, mousePixelPos.y);
             m_player->update(t_deltaTime, mousePos);
 
             //check if capture is complete

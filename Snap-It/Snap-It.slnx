@@ -1,7 +1,0 @@
-<Solution>
-  <Configurations>
-    <Platform Name="x64" />
-    <Platform Name="x86" />
-  </Configurations>
-  <Project Path="Snap-It/Snap-It.vcxproj" Id="8accfda6-a84e-48f8-9032-61e3447c02cb" />
-</Solution>

@@ -29,10 +29,10 @@
       <UniqueIdentifier>{bfed8eb1-6edf-4d35-b3aa-bf83e0a92f0d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\MenuManagement">
-      <UniqueIdentifier>{44598acd-b194-4149-beda-0450690e3f13}</UniqueIdentifier>
+      <UniqueIdentifier>{6c014771-a75a-4a7d-af11-e67f6c89d7a1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\MenuManagement">
-      <UniqueIdentifier>{454e0f9c-2a56-4a58-a920-f1a59988c426}</UniqueIdentifier>
+      <UniqueIdentifier>{06ee47c6-a826-4d9d-b8c9-1dfc6781df13}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -55,12 +55,6 @@
     <Media Include="ASSETS\AUDIO\beep.wav">
       <Filter>Resource Files\AUDIO</Filter>
     </Media>
-    <Media Include="ASSETS\AUDIO\camera-shutter.mp3">
-      <Filter>Resource Files\AUDIO</Filter>
-    </Media>
-    <Media Include="ASSETS\AUDIO\camera-shutter.wav">
-      <Filter>Resource Files\AUDIO</Filter>
-    </Media>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -78,10 +72,10 @@
     <ClCompile Include="src\Entity.cpp">
       <Filter>Source Files\Entities</Filter>
     </ClCompile>
-    <ClCompile Include="src\Button.cpp">
+    <ClCompile Include="Button.cpp">
       <Filter>Source Files\MenuManagement</Filter>
     </ClCompile>
-    <ClCompile Include="src\Menu.cpp">
+    <ClCompile Include="Menu.cpp">
       <Filter>Source Files\MenuManagement</Filter>
     </ClCompile>
   </ItemGroup>
@@ -98,13 +92,13 @@
     <ClInclude Include="include\Entity.h">
       <Filter>Header Files\Entities</Filter>
     </ClInclude>
-    <ClInclude Include="include\Button.h">
+    <ClInclude Include="Button.h">
       <Filter>Header Files\MenuManagement</Filter>
     </ClInclude>
-    <ClInclude Include="include\GameState.h">
+    <ClInclude Include="GameState.h">
       <Filter>Header Files\MenuManagement</Filter>
     </ClInclude>
-    <ClInclude Include="include\Menu.h">
+    <ClInclude Include="Menu.h">
       <Filter>Header Files\MenuManagement</Filter>
     </ClInclude>
   </ItemGroup>
