@@ -3,9 +3,11 @@
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
+#include<vector>
 #include "GameState.h"
 #include "Menu.h"
 #include "Player.h"
+#include "NPC.h"
 
 class Game
 {
@@ -23,6 +25,9 @@ private:
     void render();
     bool loadAssets();
 
+    void spawnNPCs();
+    void checkNPCsInCamera();
+
     sf::RenderWindow window;
     sf::Font font;
     bool exitGame = false;
@@ -39,6 +44,9 @@ private:
 
     //Player
     std::unique_ptr<Player> m_player;
+
+    //npc
+    std::vector<std::unique_ptr<NPC>> m_npcs;
 };
 
 #pragma warning( pop ) 

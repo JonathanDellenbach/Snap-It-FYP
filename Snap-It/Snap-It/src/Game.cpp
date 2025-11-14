@@ -4,7 +4,8 @@
 Game::Game() :
     window{ sf::VideoMode{ sf::Vector2u{1920U, 1080U}, 32U }, "Snap-It" },
     m_gameValid(false),
-    m_currentState(GameState::Menu)
+    m_currentState(GameState::Menu),
+    m_currentPhase(GamePhase::Introduction)
 {
     m_gameValid = loadAssets();
 
@@ -29,6 +30,8 @@ Game::Game() :
         {
             m_player->loadCaptureSound("assets/AUDIO/camera-shutter.wav");
         }
+
+        spawnNPCs();
     }
 }
 
@@ -136,14 +139,16 @@ void Game::processMouseClick(const std::optional<sf::Event> t_event)
 
     if (mouseClick->button == sf::Mouse::Button::Left)
     {
-        if (m_currentState == GameState::Menu && m_menu)
+        if (m_currentState == GameState::Menu && m_menu) //menu clicks
         {
             m_menu->handleMouseClick(sf::Vector2f((mouseClick->position.x), (mouseClick->position.y)));
         }
-        else if (m_currentState == GameState::Playing && m_player)
+        else if (m_currentState == GameState::Playing && m_player) //camera clicks
         {
             m_player->startCapture();
             m_currentState = GameState::Capturing;
+
+            checkNPCsInCamera(); // check what npcs are in camera view
             std::cout << "Gamestate changed: Capturing" << std::endl;
         }
     }
@@ -182,6 +187,15 @@ void Game::update(sf::Time t_deltaTime)
             sf::Vector2f mousePos(mousePixelPos.x, mousePixelPos.y);
             m_player->update(t_deltaTime, mousePos);
         }
+
+        for (auto& npc : m_npcs)
+        {
+            if (npc && npc->isValid())
+            {
+                npc->update(t_deltaTime);
+            }
+        }
+
         break;
 
     case GameState::Capturing:
@@ -198,6 +212,14 @@ void Game::update(sf::Time t_deltaTime)
                 std::cout << "Capture complete return to Playing gameState" << std::endl;
                 m_currentState = GameState::Playing;
                 m_player->resetCapture();
+            }
+        }
+
+        for (auto& npc : m_npcs)
+        {
+            if (npc && npc->isValid())
+            {
+                npc->update(t_deltaTime);
             }
         }
         break;
@@ -239,6 +261,14 @@ void Game::render()
     case GameState::Playing:
     case GameState::Capturing:
 
+        for (const auto& npc : m_npcs)
+        {
+            if (npc && npc->isValid())
+            {
+                npc->render(window);
+            }
+        }
+
         if (m_player)
         {
             m_player->render(window);
@@ -273,4 +303,89 @@ void Game::render()
     }
 
     window.display();
+}
+
+void Game::spawnNPCs()
+{
+    std::srand(static_cast<unsigned int>(std::time(nullptr)));
+
+    float minX = 100.0f;
+    float maxX = 1800.0f;
+    float minY = 100.0f;
+    float maxY = 900.0f;
+
+    for (int i = 0; i < 10; ++i) //spawn 10 Red NPCs
+    {
+        float randomX = minX + static_cast<float>(std::rand()) / RAND_MAX * (maxX - minX);
+        float randomY = minY + static_cast<float>(std::rand()) / RAND_MAX * (maxY - minY);
+
+        auto redNPC = std::make_unique<NPC>(NPCType::Red, sf::Vector2f(randomX, randomY));
+        if (redNPC->isValid())
+        {
+            m_npcs.push_back(std::move(redNPC)); //ownership from rednpc to npc obj
+        }
+    }
+
+    
+    for (int i = 0; i < 10; ++i) //spawn 10 Blue NPCs
+    {
+        float randomX = minX + static_cast<float>(std::rand()) / RAND_MAX * (maxX - minX);
+        float randomY = minY + static_cast<float>(std::rand()) / RAND_MAX * (maxY - minY);
+
+        auto blueNPC = std::make_unique<NPC>(NPCType::Blue, sf::Vector2f(randomX, randomY));
+        if (blueNPC->isValid())
+        {
+            m_npcs.push_back(std::move(blueNPC)); //ownership from bluenpc to npc obj
+        }
+    }
+
+    //std::cout << "Total NPCs: " << m_npcs.size() << std::endl;
+}
+
+void Game::checkNPCsInCamera()
+{
+    if (!m_player) return;
+
+    sf::FloatRect cameraArea = m_player->getCaptureArea(); //global bounds of the viewfinder rec
+    int capturedCount = 0;
+
+    std::cout << "=== Camera Capture Check ===" << std::endl;
+
+    for (auto& npc : m_npcs)
+    {
+        if (npc && npc->isValid())
+        {
+            sf::FloatRect npcBounds = npc->getBounds();
+
+            //check if NPC intersects with camera area
+            if (cameraArea.findIntersection(npcBounds).has_value())
+            {
+                npc->setInCameraView(true);
+                npc->setPhotographed(true);
+                npc->triggerHighlight();
+                capturedCount++;
+
+                std::string npcColor;
+                if (npc->getType() == NPCType::Red)
+                {
+                    npcColor = "Red";
+                }
+                else if (npc->getType() == NPCType::Blue)
+                {
+                    npcColor = "Blue";
+                }
+
+                //log npc in the capture
+                sf::Vector2f npcPos = npc->getPosition();
+                std::cout << "Captured " << npcColor << " NPC at the pos ("<< npcPos.x << ", " << npcPos.y << ")" << std::endl;
+            }
+            else
+            {
+                npc->setInCameraView(false);
+            }
+        }
+    }
+
+    std::cout << "Total NPCs captured: " << capturedCount << std::endl;
+    std::cout << "=========================" << std::endl;
 }
